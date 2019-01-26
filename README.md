@@ -24,7 +24,7 @@ import { TwitterUtils } from './src/data/twitter';
 import { ScrapperBot } from './src/scrapper-bot';
 
 console.log('\x1Bc'); // clear the console
-var bot = new ScrapperBot(); // create a twit bot
+let bot = new ScrapperBot(); // create a twit bot
 
 bot.searchQuery = TwitterUtils.generateSearchQuery({
     term: 'accordo.com',
