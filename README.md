@@ -1,5 +1,5 @@
 # Twitter-Scrapper
-Scrape and stream Twitter for content matching the search query provided. 
+Scrape and stream in real-time Twitter for content matching the search query provided. 
 No api authentication required.
 
 
@@ -19,16 +19,31 @@ All content will be saved to the "result" folder, each seperated by their Twitte
 
 # Bot search parameters
 Set the robot's query parameters in server.ts
-Bots run asynchronously so you can have multiple bots with different search parameters at running at the same time.
 ```ts
-import { TwitterUtils } from './src/data/twitter';
+import * as Configs from './src/configs';
+import * as FileSystem from 'fs-extra';
+
 import { ScrapperBot } from './src/scrapper-bot';
+import { TwitterUtils } from './src/data/twitter';
+import { Utils } from './src/utils';
 
 console.log('\x1Bc'); // clear the console
-let bot = new ScrapperBot(); // create a twit bot
 
+// clear content of destination file
+FileSystem.remove(Configs.appConfigs.saveLocation, (error) => {
+    if (error) {
+        Utils.handleError(error);
+    } else {
+        FileSystem.mkdirSync(Configs.appConfigs.saveLocation);
+    }
+});
+
+// create a bot that scrapes all content that mentions 'accordo.com'
+// the bot will save images as well as data collected
+// very easy to add extra functionalities such as saving videos 
+let bot = new ScrapperBot();
 bot.searchQuery = TwitterUtils.generateSearchQuery({
-    //term: 'accordo.com',
+    // term: 'accordo.com',
     operators: [
         {
             operator: 'url:',
@@ -42,6 +57,8 @@ bot.searchQuery = TwitterUtils.generateSearchQuery({
 });
 // eliminate incorrect urls matched
 bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
+// the bot is asynchorous so you can have multiple running at the same time
+// scrapping different search parameters
 bot.start();
 ```
 ## Resulting query
