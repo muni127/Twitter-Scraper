@@ -5,11 +5,12 @@
   "scripts": {
     "start": "npm-run-all build serve",
     "build": "tsc",
-    "serve": "node server"
+    "serve": "node bin/server"
   },
   "author": {
     "name": "Duc Minh Ha"
   },
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^8.0.14"
   },

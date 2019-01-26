@@ -2,7 +2,7 @@
   "compileOnSave": true,
   "compilerOptions": {
     "module": "commonjs",
-    //"outDir": "./bin",
+    "outDir": "./bin",
     "target": "es6",
     "lib": [
       "es6",

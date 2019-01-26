@@ -41,6 +41,7 @@
     <TypeScriptCompile Include="src\scrapper-bot.ts" />
     <TypeScriptCompile Include="src\data\azure.ts" />
     <TypeScriptCompile Include="server.ts" />
+    <Content Include="LICENSE" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\utils.ts" />
