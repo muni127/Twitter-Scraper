@@ -43,8 +43,8 @@ bot.searchQuery = TwitterUtils.generateSearchQuery({
 bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
 bot.start();
 ```
-# Resulting query
+## Resulting query
 ``` shell
 http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
 ```
-# Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
+## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
