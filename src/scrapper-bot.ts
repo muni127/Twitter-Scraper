@@ -46,7 +46,7 @@ export class ScrapperBot {
      * @param includeImages should scrape images as well
      */
     private scrape(max_position?: string, since_id?: number): Promise<void> {
-        // construct scrape target url
+        // construct scrape target url encoding all components
         let components = Querystring.stringify({
             'f': 'tweets', // this makes it so that the latest content comes first
             'q': this.searchQuery,
@@ -58,7 +58,7 @@ export class ScrapperBot {
         let url = `${Configs.appConfigs.twitterSearchUrl}?${components}`;
 
         return new Promise<void>((resolve, reject) => {
-            console.log(`[0_0] Scanning`);
+            console.log(`[0_0] Scanning ${url}`);
             // Retrieve scrape result and parse html to json
             HttpRequest.get(url, (error, response, body) => {
                 if (error) {
