@@ -5,7 +5,7 @@ No api authentication required.
 
 # Installing
 
-Install Node.js on your computer then clone this project to a folder on your file system.
+[Download](https://nodejs.org/en/download/) and install Node.js on your computer then clone this project to a folder on your file system.
 
 # Usage
 
