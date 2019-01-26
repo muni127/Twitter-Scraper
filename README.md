@@ -17,8 +17,9 @@ npm start
 
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
-# Bot query parameters
+# Bot search parameters
 Set the robot's query parameters in server.ts
+Bots run asynchronously so you can have multiple bots with different search parameters at running at the same time.
 ```ts
 import { TwitterUtils } from './src/data/twitter';
 import { ScrapperBot } from './src/scrapper-bot';
@@ -27,7 +28,7 @@ console.log('\x1Bc'); // clear the console
 let bot = new ScrapperBot(); // create a twit bot
 
 bot.searchQuery = TwitterUtils.generateSearchQuery({
-    term: 'accordo.com',
+    //term: 'accordo.com',
     operators: [
         {
             operator: 'url:',
@@ -45,7 +46,7 @@ bot.start();
 ```
 ## Resulting query
 ``` shell
-http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+http://twitter.com/i/search/timeline?f=tweets&q=url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
 ```
 ## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
 
