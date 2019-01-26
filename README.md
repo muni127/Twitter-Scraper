@@ -17,8 +17,8 @@ npm start
 
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
-# Set the robot's query parameters in server.ts
-
+# Bot query parameters
+Set the robot's query parameters in server.ts
 ```ts
 import { TwitterUtils } from './src/data/twitter';
 import { ScrapperBot } from './src/scrapper-bot';
@@ -49,8 +49,8 @@ http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%
 ```
 ## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
 
-# Change the bot's storage location and stream interval in ./src/configs.ts
-
+# Configuration
+Change the bot's storage location and stream interval in ./src/configs.ts
 ```ts
 /**
  *  Stores all bot configurations
