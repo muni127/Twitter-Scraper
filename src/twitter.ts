@@ -104,6 +104,11 @@ export class TwitterUtils {
         return result;
     }
 
+    /**
+     * Collect useful  information about the Tweet from the HTML provided and returns it as a Tweet object.
+     * @param tweetBlock HTML form of the tweet
+     * @returns {Tweet} a Tweet object serializable by JSON
+     */
     static parseResult(tweetBlock: HTMLElement): Tweet {
         let has_cards: boolean = tweetBlock.querySelector('[data-has-cards]') ? true : false;
         return {

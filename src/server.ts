@@ -6,7 +6,7 @@ import { TwitterUtils } from './twitter';
 
 console.log('\x1Bc'); // clear the console
 
-// create result storage folder
+// create result storage folder if not already exists
 if (!FileSystem.existsSync(Configs.appConfigs.saveLocation)) {
     FileSystem.mkdirSync(Configs.appConfigs.saveLocation);
 }
@@ -30,10 +30,11 @@ bot.searchQuery = TwitterUtils.generateSearchQuery({
 });
 // eliminate incorrect urls matched
 bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
-// the bot is asynchorous so you can have multiple running at the same time
-// scrapping different search parameters
 bot.start();
 
+// the bots are asynchorous so you can have multiple running at the same time
+// scrapping different search parameters.
+// Bot names need to be unique. This helps sorting results.
 let bot2 = new ScrapperBot('Accordo Group Bot');
 bot2.searchQuery = TwitterUtils.generateSearchQuery({
     operators: [

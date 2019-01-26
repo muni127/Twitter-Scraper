@@ -6,7 +6,6 @@ import * as Configs from './configs';
 import { TweetSearchResult, TwitterUtils, Tweet } from './twitter';
 import { Utils } from './utils';
 import { JSDOM } from 'jsdom';
-import { error } from 'util';
 
 const dom = new JSDOM(`<!DOCTYPE html>`); // create a fake document environment to parse HTML result
 const window = dom.window;
@@ -21,13 +20,12 @@ export class ScrapperBot {
     private bot_name: string;
     private storage_label: string;
     private storage_location: string;
+    private running: boolean;
+    private streaming: boolean;
+    private latest_tweet_id: number;
 
     blacklistedUrlPhrases: string[] = [];
     searchQuery: string = '';
-
-    private running: boolean = false;
-    private streaming: boolean = false;
-    private latest_tweet_id: number = 0;
 
     constructor(name: string) {
         if (!name.length) {
@@ -39,11 +37,16 @@ export class ScrapperBot {
         }
         this.bot_name = name;
         ScrapperBot.bot_names.push(name);
+
         // Set up storage parameters to store data using current timestamp
         this.storage_label = `${name} ${new Date().toLocaleString().replace(new RegExp(':', 'g'), '-')}`;
         this.storage_location = `${Configs.appConfigs.saveLocation}/${this.storage_label}`;
         // Create destination folder
         FileSystem.mkdirSync(this.storage_location);
+
+        this.running = false;
+        this.streaming = false;
+        this.latest_tweet_id = 0;
     }
 
     /**
@@ -61,8 +64,9 @@ export class ScrapperBot {
     }
 
     /**
-     * Finds all result on twitter with the query specified
-     * @param includeImages should scrape images as well
+     * Finds all result on twitter with the query specified going back in time.
+     * @param max_position the max position of where the scrape shold start from.
+     * @param since_id the minimum Id of the Tweet the scrape can go back to.
      */
     private scrape(max_position?: string, since_id?: number): Promise<void> {
         // construct scrape target url encoding all components
@@ -109,10 +113,8 @@ export class ScrapperBot {
     }
 
     /**
-     * Finds all content on Twitter by term provided and stores anything found
-     * to Azure blob storage
-     * @param term for filtering search
-     * @param includeImages specify if bot should save images
+     * Check Twitter for any updates. Sleeps when scan is completed.
+     * This stream is async because we don't want the bot to spam Twitter.
      */
     private async stream() {
         if (this.streaming) {
@@ -131,14 +133,14 @@ export class ScrapperBot {
     }
 
     /**
-     * Filter and take only important information about the results.
-     * find all data-expanded-url include accordo.com/"
-     * @param scrapeResult
-     * @returns {success} indicates whether scrape should continue
+     * Filter and process only important information about the results.
+     * @param scrape_results results returned from Twitter as a list of Tweets in HTML
+     * @param since_id the oldest Id we should process.
+     * @returns {success} indicates whether scrape should continue. False if since_id is surpassed.
      */
-    private processResults(scrapeResults: TweetSearchResult, since_id: number): boolean {
+    private processResults(scrape_results: TweetSearchResult, since_id: number): boolean {
          // save the results to the emulated document to parse as HTML
-        document.body.innerHTML = scrapeResults.items_html;
+        document.body.innerHTML = scrape_results.items_html;
         for (let tweetBlock of Utils.htmlCollectionToArray<HTMLLIElement>(document.body.children)) {
             // Set the latest Id as the largest Id seen so that 
             // we can keep track of the next group to query for using since_id
@@ -159,7 +161,7 @@ export class ScrapperBot {
             let validResult = true;
             for (let phrase of this.blacklistedUrlPhrases) {
                 if (tweetBlock.querySelector(`[data-expanded-url*="${phrase}"]`)) {
-                    console.warn(`[X_X] Item blacklisted Id: ${id}\n L->  Illegal phrase matched: "${phrase}"\n`);
+                    console.warn(`[X_X] ${this.bot_name}: Item blacklisted Id: ${id}\n L->  Illegal phrase matched: "${phrase}"\n`);
                     validResult = false;
                     break;
                 }
@@ -175,25 +177,30 @@ export class ScrapperBot {
 
     /**
      * Parse and saves the result to the destination folder.
-     * @param name
+     * @param name name of result to be used
      * @param result
      */
     private saveResult(name: string, result: HTMLLIElement): void {
         // create destination folder for result
-        FileSystem.mkdirSync(`${this.storage_location}/${name}`);
-        // save original result
-        FileSystem.writeFileSync(
-            `${this.storage_location}/${name}/${name}.html`,
-            result.outerHTML
-        );
-        // more data analysis friendly json result
-        let tweet = TwitterUtils.parseResult(result);
-        FileSystem.writeFileSync(
-            `${this.storage_location}/${name}/${name}.json`,
-            JSON.stringify(tweet, null, 4) // pretty print json
-        );
-        this.getTweetImages(name, tweet);
-        console.log(`[o_O] ${this.bot_name}: Collecting images for item: ${name}\n`);
+        FileSystem.mkdir(`${this.storage_location}/${name}`, (error) => {
+            if (error) {
+                Utils.handleError(error);
+            } else {
+                // save original result
+                FileSystem.writeFileSync(
+                    `${this.storage_location}/${name}/${name}.html`,
+                    result.outerHTML
+                );
+                // more data analysis friendly json result
+                let tweet = TwitterUtils.parseResult(result);
+                FileSystem.writeFileSync(
+                    `${this.storage_location}/${name}/${name}.json`,
+                    JSON.stringify(tweet, null, 4) // pretty print json
+                );
+                this.getTweetImages(name, tweet);
+                console.log(`[o_O] ${this.bot_name}: Collecting images for item: ${name}\n`);
+            }
+        });
     }
 
     /**
@@ -201,16 +208,24 @@ export class ScrapperBot {
      * @param tweet tweet containing image urls
      */
     private getTweetImages(name: string, tweet: Tweet): void {
+        // download user's avatar image
         this.downloadImage(name, tweet.user.avatar);
-        let index = 0;
+        // download the rest of the images
         for (let imageUrl of tweet.images) {
             this.downloadImage(name, imageUrl);
         }
     }
 
+    /**
+     * Retrieves image from URL
+     * @param name name of result to be used
+     * @param imageUrl url of image to be downloaded
+     */
     private downloadImage(name: string, imageUrl: string): void {
         HttpRequest.get({ url: imageUrl, encoding: 'binary' }, (error, response, body) => {
-            if (error) Utils.handleError(error);
+            if (error) {
+                Utils.handleError(error);
+            }
             if (body) {
                 FileSystem.writeFileSync(
                     `${this.storage_location}/${name}/${Utils.getFileName(imageUrl)}`,
@@ -223,6 +238,11 @@ export class ScrapperBot {
         });
     }
 
+    /**
+     * Pauses the bot for sometime
+     * @param ms amount of time to sleep in milliseconds
+     * @returns {promise} promise which will end when the bot can start again
+     */
     private sleep(ms: number): Promise<void> {
         console.log(`[v_v] ${this.bot_name}: Sleeping for ${ms} ms`);
         return new Promise<void>(resolve => setTimeout(resolve, ms));
