@@ -1,0 +1,28 @@
+{
+  "name": "accordo-twitter-fetch",
+  "version": "0.0.0",
+  "description": "Accordo Twitter Bot fetches all content mentioning accordo.com",
+  "scripts": {
+    "start": "npm-run-all build serve",
+    "build": "tsc",
+    "serve": "node server"
+  },
+  "author": {
+    "name": "Duc Minh Ha"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.14"
+  },
+  "engines": {
+    "node": "^8.0.0"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^5.0.4",
+    "@types/jsdom": "^12.2.1",
+    "@types/request": "^2.48.1",
+    "fs-extra": "^7.0.1",
+    "jsdom": "^13.2.0",
+    "npm-run-all": "^4.1.5",
+    "request": "^2.88.0"
+  }
+}
