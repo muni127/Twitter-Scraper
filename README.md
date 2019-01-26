@@ -14,7 +14,44 @@ Run the following from the project's folder.
 ```shell
 npm start
 ```
+### Result
+```shell
+[v_v] Accordo Bot: initialising
 
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+[v_v] Accordo Group Bot: initialising
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
+
+[^_^] Accordo Group Bot: Saved item: 1086302280498929700
+
+...
+
+[X_X] Accordo Bot: Item blacklisted Id: 1083714710372008000
+ L->  Illegal phrase matched: "accordo.com."
+ 
+...
+
+[^_^] Accordo Group Bot: Results processed
+[^_^] Accordo Group Bot: Has more items: true
+
+...
+
+[^_^] Accordo Bot: Saved item: 1055548928932819000
+
+...
+
+[o_O] Accordo Group Bot: Collecting images for item: 1055993324501270500
+
+...
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+[^_^] Accordo Group Bot: Latest Id: 1087800732932223000
+[v_v] Accordo Group Bot: Sleeping for 10000 ms
+[^_^] Accordo Bot: Latest Id: 1085568128082337800
+[v_v] Accordo Bot: Sleeping for 10000 ms
+```
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
 # Bot search parameters
