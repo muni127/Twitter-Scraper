@@ -9,7 +9,7 @@ Install Node.js on your computer then clone this project to a folder on your fil
 
 # Usage
 
-Run the following from the project's folder:
+Run the following from the project's folder
 
 ```shell
 npm start
