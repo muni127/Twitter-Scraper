@@ -9,8 +9,10 @@ Install Node.js on your computer then clone this project to a folder on your fil
 
 # Usage
 
+Run the following from the project's folder:
+
 ```shell
-run npm start
+npm start
 ```
 
 # Set robot query parameters in server.ts
@@ -39,6 +41,8 @@ bot.searchQuery = TwitterUtils.generateSearchQuery({
 bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
 bot.start();
 ```
+Resulting query:
 ``` shell
-Resulting query: http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
 ```
+Learn how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
