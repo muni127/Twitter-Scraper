@@ -17,8 +17,9 @@ npm start
 
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
-# Bot query parameters
+# Bot search parameters
 Set the robot's query parameters in server.ts
+Bots run asynchronously so you can have multiple bots with different search parameters at running at the same time.
 ```ts
 import { TwitterUtils } from './src/data/twitter';
 import { ScrapperBot } from './src/scrapper-bot';
