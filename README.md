@@ -15,6 +15,8 @@ Run the following from the project's folder:
 npm start
 ```
 
+All content will be saved to the "result" folder, each seperated by their Twitter Id.
+
 # Set robot query parameters in server.ts
 
 ```ts
