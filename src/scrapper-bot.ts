@@ -3,7 +3,7 @@ import * as HttpRequest from 'request';
 import * as Querystring from 'querystring';
 import * as Configs from './configs';
 
-import { TweetSearchResult, SearchQueryParams, TwitterUtils, Tweet, TwitterUser } from './data/twitter';
+import { TweetSearchResult, TwitterUtils, Tweet } from './data/twitter';
 import { Utils } from './utils';
 import { JSDOM } from 'jsdom';
 
@@ -21,24 +21,13 @@ export class ScrapperBot {
     private streaming: boolean = false;
     private latest_tweet_id: number = 0;
 
-    constructor() {
-        console.log('[v_v] Twitter Bot initialising\n');
-        // clear content of destination file
-        FileSystem.remove(Configs.appConfigs.saveLocation, (error) => {
-            if (error) {
-                this.handleError(error);
-            } else {
-                FileSystem.mkdirSync(Configs.appConfigs.saveLocation);
-            }
-        });
-    }
-
     /**
      *  Begins the scrape and stream processes
      */
-    start() {
-        console.log('{-.-} The bot has been released !!!');
-        this.scrape().then(this.stream.bind(this));
+    async start() {
+        console.log('[v_v] Twitter Bot initialising\n');
+        await this.scrape();
+        await this.stream();
     }
 
     /**
@@ -62,7 +51,7 @@ export class ScrapperBot {
             // Retrieve scrape result and parse html to json
             HttpRequest.get(url, (error, response, body) => {
                 if (error) {
-                    this.handleError(error);
+                    Utils.handleError(error);
                     reject(error);
                 }
                 if (body) {
@@ -79,10 +68,10 @@ export class ScrapperBot {
                             }
                         }
                     } else {
-                        this.handleError('Could not parse data retrieved');
+                        Utils.handleError('Could not parse data retrieved');
                     }
                 } else {
-                    this.handleError('Could not receive any data from twitter');
+                    Utils.handleError('Could not receive any data from twitter');
                 }
                 resolve();
             });
@@ -187,7 +176,7 @@ export class ScrapperBot {
 
     private downloadImage(name: string, imageUrl: string): void {
         HttpRequest.get({ url: imageUrl, encoding: 'binary' }, (error, response, body) => {
-            if (error) this.handleError(error);
+            if (error) Utils.handleError(error);
             if (body) {
                 FileSystem.writeFileSync(
                     `${Configs.appConfigs.saveLocation}/${name}/${Utils.getFileName(imageUrl)}`,
@@ -195,7 +184,7 @@ export class ScrapperBot {
                     'binary'
                 );
             } else {
-                this.handleError(`Could not receive any image from ${imageUrl}`);
+                Utils.handleError(`Could not receive any image from ${imageUrl}`);
             }
         });
     }
@@ -203,14 +192,5 @@ export class ScrapperBot {
     private sleep(ms: number): Promise<void> {
         console.log(`[v_v] Sleeping for ${ms} ms`);
         return new Promise<void>(resolve => setTimeout(resolve, ms));
-    }
-
-    /**
-     * Sturtured error logging to console
-     * @param err error to be logged
-     */
-    private handleError(err: Error | string): any {
-        console.error('[6_6] Warning. An Error has occured.');
-        console.error(`----> ${err}`);
     }
 }
