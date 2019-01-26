@@ -27,7 +27,7 @@ console.log('\x1Bc'); // clear the console
 let bot = new ScrapperBot(); // create a twit bot
 
 bot.searchQuery = TwitterUtils.generateSearchQuery({
-    term: 'accordo.com',
+    //term: 'accordo.com',
     operators: [
         {
             operator: 'url:',
