@@ -15,7 +15,7 @@
     <ProjectGuid>d63901f6-9207-4c27-8c8d-350af7cdd571</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>server.ts</StartupFile>
+    <StartupFile>src\server.ts</StartupFile>
     <StartWebBrowser>True</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -39,17 +39,15 @@
   <ItemGroup>
     <TypeScriptCompile Include="src\configs.ts" />
     <TypeScriptCompile Include="src\scrapper-bot.ts" />
-    <TypeScriptCompile Include="src\data\azure.ts" />
-    <TypeScriptCompile Include="server.ts" />
+    <TypeScriptCompile Include="src\server.ts" />
     <Content Include="LICENSE" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\utils.ts" />
     <Content Include="tsconfig.json" />
-    <TypeScriptCompile Include="src\data\twitter.ts" />
+    <TypeScriptCompile Include="src\twitter.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src\data\" />
     <Folder Include="src\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->

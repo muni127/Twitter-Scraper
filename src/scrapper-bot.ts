@@ -3,9 +3,10 @@ import * as HttpRequest from 'request';
 import * as Querystring from 'querystring';
 import * as Configs from './configs';
 
-import { TweetSearchResult, TwitterUtils, Tweet } from './data/twitter';
+import { TweetSearchResult, TwitterUtils, Tweet } from './twitter';
 import { Utils } from './utils';
 import { JSDOM } from 'jsdom';
+import { error } from 'util';
 
 const dom = new JSDOM(`<!DOCTYPE html>`); // create a fake document environment to parse HTML result
 const window = dom.window;
@@ -15,17 +16,46 @@ const document = window.document;
  *  Twitter scrapper bot
  */
 export class ScrapperBot {
+    private static bot_names: string[] = [];
+
+    private bot_name: string;
+    private storage_label: string;
+    private storage_location: string;
+
     blacklistedUrlPhrases: string[] = [];
     searchQuery: string = '';
 
+    private running: boolean = false;
     private streaming: boolean = false;
     private latest_tweet_id: number = 0;
+
+    constructor(name: string) {
+        if (!name.length) {
+            throw new Error(`${name} is invalid, try 'Bot 1'\n`);
+        }
+        // Bot names should be unique
+        if (ScrapperBot.bot_names.indexOf(name) > -1) {
+            throw new Error(`A bot with name "${name}" has already been created\n`);
+        }
+        this.bot_name = name;
+        ScrapperBot.bot_names.push(name);
+        // Set up storage parameters to store data using current timestamp
+        this.storage_label = `${name} ${new Date().toLocaleString().replace(new RegExp(':', 'g'), '-')}`;
+        this.storage_location = `${Configs.appConfigs.saveLocation}/${this.storage_label}`;
+        // Create destination folder
+        FileSystem.mkdirSync(this.storage_location);
+    }
 
     /**
      *  Begins the scrape and stream processes
      */
     async start() {
-        console.log('[v_v] Twitter Bot initialising\n');
+        if (this.running) {
+            console.log(`${this.bot_name} is already running`);
+            return;
+        }
+        this.running = true;
+        console.log(`[v_v] ${this.bot_name}: initialising\n`);
         await this.scrape();
         await this.stream();
     }
@@ -47,7 +77,7 @@ export class ScrapperBot {
         let url = `${Configs.appConfigs.twitterSearchUrl}?${components}`;
 
         return new Promise<void>((resolve, reject) => {
-            console.log(`[0_0] Scanning ${url}`);
+            console.log(`[0_0] ${this.bot_name}: Scanning ${url}`);
             // Retrieve scrape result and parse html to json
             HttpRequest.get(url, (error, response, body) => {
                 if (error) {
@@ -58,13 +88,13 @@ export class ScrapperBot {
                     let result: TweetSearchResult = JSON.parse(body);
                     if (result) {
                         if (this.processResults(result, since_id)) {
-                            console.log(`[^_^] Results processed`);
-                            console.log(`[^_^] Has more items: ${result.has_more_items}\n`);
+                            console.log(`[^_^] ${this.bot_name}: Results processed`);
+                            console.log(`[^_^] ${this.bot_name}: Has more items: ${result.has_more_items}\n`);
                             // if there is still more results continue
                             if (result.has_more_items) {
                                 this.scrape(result.min_position, since_id);
                             } else {
-                                console.log('[^_^] Scrape complete');
+                                console.log(`[^_^] ${this.bot_name}: Scrape complete`);
                             }
                         }
                     } else {
@@ -85,11 +115,15 @@ export class ScrapperBot {
      * @param includeImages specify if bot should save images
      */
     private async stream() {
-        console.log('[D_D] Stream started\n');
+        if (this.streaming) {
+            console.log(`${this.bot_name} is already streaming`);
+            return;
+        }
+        console.log(`[D_D] ${this.bot_name}: Stream started\n`);
         this.streaming = true;
         while (this.streaming) {
             await this.scrape(null, this.latest_tweet_id);
-            console.log(`[^_^] Latest Id: ${this.latest_tweet_id}`);
+            console.log(`[^_^] ${this.bot_name}: Latest Id: ${this.latest_tweet_id}`);
 
             // we may not want to crawl on Twitter too frequently
             await this.sleep(Configs.appConfigs.stream_interval_ms);
@@ -133,7 +167,7 @@ export class ScrapperBot {
             // save valid tweet block to file
             if (validResult) {
                 this.saveResult(`${id}`, tweetBlock);
-                console.log(`[^_^] Saved item: ${id}\n`);
+                console.log(`[^_^] ${this.bot_name}: Saved item: ${id}\n`);
             }
         }
         return true;
@@ -146,20 +180,20 @@ export class ScrapperBot {
      */
     private saveResult(name: string, result: HTMLLIElement): void {
         // create destination folder for result
-        FileSystem.mkdirSync(`${Configs.appConfigs.saveLocation}/${name}`);
+        FileSystem.mkdirSync(`${this.storage_location}/${name}`);
         // save original result
         FileSystem.writeFileSync(
-            `${Configs.appConfigs.saveLocation}/${name}/${name}.html`,
+            `${this.storage_location}/${name}/${name}.html`,
             result.outerHTML
         );
         // more data analysis friendly json result
         let tweet = TwitterUtils.parseResult(result);
         FileSystem.writeFileSync(
-            `${Configs.appConfigs.saveLocation}/${name}/${name}.json`,
+            `${this.storage_location}/${name}/${name}.json`,
             JSON.stringify(tweet, null, 4) // pretty print json
         );
         this.getTweetImages(name, tweet);
-        console.log(`[o_O] Collecting images for item: ${name}\n`);
+        console.log(`[o_O] ${this.bot_name}: Collecting images for item: ${name}\n`);
     }
 
     /**
@@ -179,7 +213,7 @@ export class ScrapperBot {
             if (error) Utils.handleError(error);
             if (body) {
                 FileSystem.writeFileSync(
-                    `${Configs.appConfigs.saveLocation}/${name}/${Utils.getFileName(imageUrl)}`,
+                    `${this.storage_location}/${name}/${Utils.getFileName(imageUrl)}`,
                     body,
                     'binary'
                 );
@@ -190,7 +224,7 @@ export class ScrapperBot {
     }
 
     private sleep(ms: number): Promise<void> {
-        console.log(`[v_v] Sleeping for ${ms} ms`);
+        console.log(`[v_v] ${this.bot_name}: Sleeping for ${ms} ms`);
         return new Promise<void>(resolve => setTimeout(resolve, ms));
     }
 }

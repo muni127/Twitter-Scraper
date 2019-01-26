@@ -1,4 +1,4 @@
-import { Utils } from '../utils';
+import { Utils } from './utils';
 
 /**
  *  Valid query operators for Twitter search

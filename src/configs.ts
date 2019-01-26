@@ -4,6 +4,6 @@
  */
 export const appConfigs = {
     twitterSearchUrl: 'http://twitter.com/i/search/timeline',
-    saveLocation: './result',
+    saveLocation: './results',
     stream_interval_ms: 10000 // stream every 10 seconds
 };
