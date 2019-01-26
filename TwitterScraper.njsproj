@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <Name>TwitterScrapper</Name>
+    <Name>TwitterScraper</Name>
     <RootNamespace>AccordoTwitterBot</RootNamespace>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
@@ -38,7 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\configs.ts" />
-    <TypeScriptCompile Include="src\scrapper-bot.ts" />
+    <TypeScriptCompile Include="src\scraper-bot.ts" />
     <TypeScriptCompile Include="src\server.ts" />
     <Content Include="LICENSE" />
     <Content Include="package.json" />

@@ -1,4 +1,4 @@
-# Twitter-Scrapper
+# Twitter-Scraper
 Scrape and stream in real-time Twitter for content matching the search query provided. 
 No api authentication required.
 
@@ -14,7 +14,44 @@ Run the following from the project's folder.
 ```shell
 npm start
 ```
+### Result
+```shell
+[v_v] Accordo Bot: initialising
 
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+[v_v] Accordo Group Bot: initialising
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
+
+[^_^] Accordo Group Bot: Saved item: 1086302280498929700
+
+...
+
+[X_X] Accordo Bot: Item blacklisted Id: 1083714710372008000
+ L->  Illegal phrase matched: "accordo.com."
+ 
+...
+
+[^_^] Accordo Group Bot: Results processed
+[^_^] Accordo Group Bot: Has more items: true
+
+...
+
+[^_^] Accordo Bot: Saved item: 1055548928932819000
+
+...
+
+[o_O] Accordo Group Bot: Collecting images for item: 1055993324501270500
+
+...
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+[^_^] Accordo Group Bot: Latest Id: 1087800732932223000
+[v_v] Accordo Group Bot: Sleeping for 10000 ms
+[^_^] Accordo Bot: Latest Id: 1085568128082337800
+[v_v] Accordo Bot: Sleeping for 10000 ms
+```
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
 # Bot search parameters
@@ -23,7 +60,7 @@ Set the robot's query parameters in server.ts
 import * as Configs from './configs';
 import * as FileSystem from 'fs-extra';
 
-import { ScrapperBot } from './scrapper-bot';
+import { ScraperBot } from './scraper-bot';
 import { TwitterUtils } from './twitter';
 
 console.log('\x1Bc'); // clear the console
@@ -36,7 +73,7 @@ if (!FileSystem.existsSync(Configs.appConfigs.saveLocation)) {
 // create a bot with a name 'Accordo Bot' that scrapes all content that mentions 'accordo.com'
 // the bot will save images as well as data collected
 // very easy to add extra functionalities such as saving videos 
-let bot = new ScrapperBot('Accordo Bot');
+let bot = new ScraperBot('Accordo Bot');
 bot.searchQuery = TwitterUtils.generateSearchQuery({
     term: 'accordo.com',
     operators: [
@@ -55,9 +92,9 @@ bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
 bot.start();
 
 // the bots are asynchorous so you can have multiple running at the same time
-// scrapping different search parameters.
+// scraping different search parameters.
 // Bot names need to be unique. This helps sorting results.
-let bot2 = new ScrapperBot('Accordo Group Bot');
+let bot2 = new ScraperBot('Accordo Group Bot');
 bot2.searchQuery = TwitterUtils.generateSearchQuery({
     operators: [
         {

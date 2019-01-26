@@ -12,9 +12,9 @@ const window = dom.window;
 const document = window.document;
 
 /**
- *  Twitter scrapper bot
+ *  Twitter scraper bot
  */
-export class ScrapperBot {
+export class ScraperBot {
     private static bot_names: string[] = [];
 
     private bot_name: string;
@@ -32,11 +32,11 @@ export class ScrapperBot {
             throw new Error(`${name} is invalid, try 'Bot 1'\n`);
         }
         // Bot names should be unique
-        if (ScrapperBot.bot_names.indexOf(name) > -1) {
+        if (ScraperBot.bot_names.indexOf(name) > -1) {
             throw new Error(`A bot with name "${name}" has already been created\n`);
         }
         this.bot_name = name;
-        ScrapperBot.bot_names.push(name);
+        ScraperBot.bot_names.push(name);
 
         // Set up storage parameters to store data using current timestamp
         this.storage_label = `${name} ${new Date().toLocaleString().replace(new RegExp(':', 'g'), '-')}`;
