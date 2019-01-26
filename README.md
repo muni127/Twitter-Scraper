@@ -17,7 +17,7 @@ npm start
 
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
 
-# Set robot query parameters in server.ts
+# Set the robot's query parameters in server.ts
 
 ```ts
 import { TwitterUtils } from './src/data/twitter';
