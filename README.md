@@ -49,7 +49,7 @@ http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%
 ```
 ## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
 
-# Change the bot's stream interval in ./src/configs.ts
+# Change the bot's storage location and stream interval in ./src/configs.ts
 
 ```ts
 /**
