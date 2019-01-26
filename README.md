@@ -1,5 +1,5 @@
 # Twitter-Scrapper
-Scrape and stream Twitter for content matching the search query provided. 
+Scrape and stream realtime Twitter for content matching the search query provided. 
 No api authentication required.
 
 
