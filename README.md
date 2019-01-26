@@ -20,30 +20,25 @@ All content will be saved to the "result" folder, each seperated by their Twitte
 # Bot search parameters
 Set the robot's query parameters in server.ts
 ```ts
-import * as Configs from './src/configs';
+import * as Configs from './configs';
 import * as FileSystem from 'fs-extra';
 
-import { ScrapperBot } from './src/scrapper-bot';
-import { TwitterUtils } from './src/data/twitter';
-import { Utils } from './src/utils';
+import { ScrapperBot } from './scrapper-bot';
+import { TwitterUtils } from './twitter';
 
 console.log('\x1Bc'); // clear the console
 
-// clear content of destination file
-FileSystem.remove(Configs.appConfigs.saveLocation, (error) => {
-    if (error) {
-        Utils.handleError(error);
-    } else {
-        FileSystem.mkdirSync(Configs.appConfigs.saveLocation);
-    }
-});
+// create result storage folder if not already exists
+if (!FileSystem.existsSync(Configs.appConfigs.saveLocation)) {
+    FileSystem.mkdirSync(Configs.appConfigs.saveLocation);
+}
 
-// create a bot that scrapes all content that mentions 'accordo.com'
+// create a bot with a name 'Accordo Bot' that scrapes all content that mentions 'accordo.com'
 // the bot will save images as well as data collected
 // very easy to add extra functionalities such as saving videos 
-let bot = new ScrapperBot();
+let bot = new ScrapperBot('Accordo Bot');
 bot.searchQuery = TwitterUtils.generateSearchQuery({
-    // term: 'accordo.com',
+    term: 'accordo.com',
     operators: [
         {
             operator: 'url:',
@@ -57,13 +52,27 @@ bot.searchQuery = TwitterUtils.generateSearchQuery({
 });
 // eliminate incorrect urls matched
 bot.blacklistedUrlPhrases = ['accordo-com', 'accordo.com.'];
-// the bot is asynchorous so you can have multiple running at the same time
-// scrapping different search parameters
 bot.start();
+
+// the bots are asynchorous so you can have multiple running at the same time
+// scrapping different search parameters.
+// Bot names need to be unique. This helps sorting results.
+let bot2 = new ScrapperBot('Accordo Group Bot');
+bot2.searchQuery = TwitterUtils.generateSearchQuery({
+    operators: [
+        {
+            operator: '@',
+            value: 'accordogroup'
+        }
+    ]
+});
+bot2.start();
 ```
-## Resulting query
+## Results
 ``` shell
-http://twitter.com/i/search/timeline?f=tweets&q=url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=thGAVUV0VFVBaCwKfpjMDS4R0WgMCtjZrA0pgeEjUAFQAlAAA%3D
 ```
 ## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
 
@@ -76,7 +85,7 @@ Change the bot's storage location and stream interval in ./src/configs.ts
  */
 export const appConfigs = {
     twitterSearchUrl: 'http://twitter.com/i/search/timeline',
-    saveLocation: './result',
+    saveLocation: './results', // root location for saving bot results
     stream_interval_ms: 10000 // stream every 10 seconds
 };
 ```
