@@ -68,9 +68,11 @@ bot2.searchQuery = TwitterUtils.generateSearchQuery({
 });
 bot2.start();
 ```
-## Resulting query of Accordo Bot
+## Results
 ``` shell
 [0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
+
+[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=thGAVUV0VFVBaCwKfpjMDS4R0WgMCtjZrA0pgeEjUAFQAlAAA%3D
 ```
 ## Learn more about how to build Twitter's basic query [here](https://developer.twitter.com/en/docs/tweets/rules-and-filtering/overview/standard-operators)
 
