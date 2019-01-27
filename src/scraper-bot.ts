@@ -1,13 +1,11 @@
-import * as BigInt from 'big-integer';
 import * as Configs from './configs';
 import * as FileSystem from 'fs-extra';
 import * as HttpRequest from 'request';
 import * as Querystring from 'querystring';
 
-import { TweetSearchResult, TwitterUtils, Tweet, SearchQueryParams, SearchComponents } from './twitter';
+import { TweetSearchResult, TwitterUtils, Tweet, SearchComponents } from './twitter';
 import { Utils } from './utils';
 import { JSDOM } from 'jsdom';
-import { isNullOrUndefined } from 'util';
 
 const dom = new JSDOM(`<!DOCTYPE html>`); // create a fake document environment to parse HTML result
 const window = dom.window;
