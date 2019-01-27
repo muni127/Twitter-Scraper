@@ -40,7 +40,7 @@ npm start
 
 [v_v] Accordo Bot: Sleeping for 10000 ms
 ```
-All content will be saved to the "result" folder, each seperated by their Twitter Id.
+All content will be saved to the "results" folder where it was executed, each seperated by the bot's name, created time and Twitter Id.
 
 # Bot search parameters
 Set the robot's query parameters in server.ts
