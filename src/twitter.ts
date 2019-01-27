@@ -28,15 +28,16 @@ export class SearchQueryParams {
 } 
 
 export class TweetSearchResult {
+    max_position: string;
+    min_position: string;
     has_more_items: boolean;
     items_html: string;
     new_latent_count: number;
     focused_refresh_interval: number;
-    min_position: string;
 }
 
 export class Tweet {
-    id: number;
+    id: string;
     created_on: Date;
     user: TwitterUser;
     text: string;
@@ -53,7 +54,7 @@ export class Tweet {
 }
 
 export class TwitterUser {
-    id: number;
+    id: string;
     name?: string;
     screen_name?: string;
     avatar?: string;
@@ -82,7 +83,7 @@ export class TwitterUtils {
         let result: TwitterUser[] = [];
         for (let container of Utils.nodeListOfToArray(tweetBlock.querySelectorAll('.ReplyingToContextBelowAuthor .js-user-profile-link'))) {
             result.push({
-                id: +container.getAttribute('data-user-id'),
+                id: container.getAttribute('data-user-id'),
                 screen_name: container.getAttribute('href').replace('/', ''),
             });
         }
@@ -136,10 +137,10 @@ export class TwitterUtils {
      */
     static parseResult(tweetBlock: HTMLElement): Tweet {
         return {
-            id: +tweetBlock.querySelector('[data-tweet-id]').getAttribute('data-tweet-id'),
+            id: tweetBlock.querySelector('[data-tweet-id]').getAttribute('data-tweet-id'),
             created_on: new Date(+tweetBlock.querySelector('.tweet-timestamp [data-time-ms]').getAttribute('data-time-ms')),
             user: {
-                id: +tweetBlock.querySelector('[data-user-id]').getAttribute('data-user-id'),
+                id: tweetBlock.querySelector('[data-user-id]').getAttribute('data-user-id'),
                 name: tweetBlock.querySelector('[data-name]').getAttribute('data-name'),
                 screen_name: tweetBlock.querySelector('[data-screen-name]').getAttribute('data-screen-name'),
                 avatar: tweetBlock.querySelector('.content .stream-item-header a img').getAttribute('src')
