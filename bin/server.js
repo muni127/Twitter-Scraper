@@ -13,8 +13,8 @@ if (!FileSystem.existsSync(Configs.appConfigs.saveLocation)) {
 // the bot will save images as well as data collected
 // very easy to add extra functionalities such as saving videos 
 var bot = new scraper_bot_1.ScraperBot('Accordo Bot');
-bot.searchQuery = twitter_1.TwitterUtils.generateSearchQuery({
-    term: 'accordo.com',
+bot.query = twitter_1.TwitterUtils.generateSearchQuery({
+    term: 'accordo.com OR',
     operators: [
         {
             operator: 'url:',
@@ -33,7 +33,7 @@ bot.start();
 // scraping different search parameters.
 // Bot names need to be unique. This helps sorting results.
 var bot2 = new scraper_bot_1.ScraperBot('Accordo Group Bot');
-bot2.searchQuery = twitter_1.TwitterUtils.generateSearchQuery({
+bot2.query = twitter_1.TwitterUtils.generateSearchQuery({
     operators: [
         {
             operator: '@',

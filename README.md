@@ -18,12 +18,7 @@ npm start
 ```shell
 [v_v] Accordo Bot: initialising
 
-[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
-[v_v] Accordo Group Bot: initialising
-
-[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
-
-[^_^] Accordo Group Bot: Saved item: 1086302280498929700
+[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20OR%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=true&include_available_features=true&max_position=
 
 ...
 
@@ -32,24 +27,17 @@ npm start
  
 ...
 
-[^_^] Accordo Group Bot: Results processed
-[^_^] Accordo Group Bot: Has more items: true
+[^_^] Accordo Bot: Saved item: 1055576833087823872
+
+[o_O] Accordo Bot: Collecting images for item: 1055572621268414464
+
+[o_O] Accordo Bot: Collecting images for item: 1055572621268414464
 
 ...
 
-[^_^] Accordo Bot: Saved item: 1055548928932819000
+[^_^] Accordo Bot: Results processed
+[^_^] Accordo Bot: Scrape complete
 
-...
-
-[o_O] Accordo Group Bot: Collecting images for item: 1055993324501270500
-
-...
-
-[0_0] Accordo Group Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=%40accordogroup&src=typd&include_entities=1&include_available_features=1&max_position=
-[0_0] Accordo Bot: Scanning http://twitter.com/i/search/timeline?f=tweets&q=accordo.com%20url%3Aaccordo.com%20-%22accordo%20com%22&src=typd&include_entities=1&include_available_features=1&max_position=
-[^_^] Accordo Group Bot: Latest Id: 1087800732932223000
-[v_v] Accordo Group Bot: Sleeping for 10000 ms
-[^_^] Accordo Bot: Latest Id: 1085568128082337800
 [v_v] Accordo Bot: Sleeping for 10000 ms
 ```
 All content will be saved to the "result" folder, each seperated by their Twitter Id.
@@ -74,8 +62,8 @@ if (!FileSystem.existsSync(Configs.appConfigs.saveLocation)) {
 // the bot will save images as well as data collected
 // very easy to add extra functionalities such as saving videos 
 let bot = new ScraperBot('Accordo Bot');
-bot.searchQuery = TwitterUtils.generateSearchQuery({
-    term: 'accordo.com',
+bot.query = TwitterUtils.generateSearchQuery({
+    term: 'accordo.com OR',
     operators: [
         {
             operator: 'url:',
@@ -95,7 +83,7 @@ bot.start();
 // scraping different search parameters.
 // Bot names need to be unique. This helps sorting results.
 let bot2 = new ScraperBot('Accordo Group Bot');
-bot2.searchQuery = TwitterUtils.generateSearchQuery({
+bot2.query = TwitterUtils.generateSearchQuery({
     operators: [
         {
             operator: '@',

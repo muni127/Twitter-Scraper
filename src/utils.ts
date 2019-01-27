@@ -7,16 +7,24 @@ export class Utils {
         return Array.prototype.slice.call(collection);
     };
 
+    /**
+     * Returns the file name and extension from the file's path.
+     * @param filePath path to the file's exact location inluding name and extension.
+     */
     static getFileName(filePath: string): string {
         return filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
     }
 
     /**
-     * Sturtured error logging to console
-     * @param err error to be logged
+     * Sturtured error logging to console.
+     * @param error error to be logged.
+     * @param callback function to execute when done.
      */
-    static handleError(err: Error | string): any {
+    static handleError(error: Error | string, callback?: Function): any {
         console.error('!!!!! Error. An Error has occured.');
-        console.error(`----> ${err}`);
+        console.error(`----> ${error}`);
+        if (callback) {
+            callback.call(this.arguments, error);
+        }
     }
 }

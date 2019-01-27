@@ -4,7 +4,7 @@ import * as FileSystem from 'fs-extra';
 import * as HttpRequest from 'request';
 import * as Querystring from 'querystring';
 
-import { TweetSearchResult, TwitterUtils, Tweet } from './twitter';
+import { TweetSearchResult, TwitterUtils, Tweet, SearchQueryParams, SearchComponents } from './twitter';
 import { Utils } from './utils';
 import { JSDOM } from 'jsdom';
 import { isNullOrUndefined } from 'util';
@@ -17,129 +17,147 @@ const document = window.document;
  *  Twitter scraper bot
  */
 export class ScraperBot {
-    private static bot_names: string[] = [];
+    private static botNames: string[] = [];
 
-    private bot_name: string;
+    private botName: string;
     private storage_label: string;
-    private storage_location: string;
-    private running: boolean;
-    private streaming: boolean;
-    private stream_max_position: string;
-    private latest_tweet_id: string;
+    private storageLocation: string;
+    private latest_max_position: string;
+    private urlComponents: SearchComponents;
 
+    private running: boolean = false;
+    private streaming: boolean = false;
+
+    query: string;
     blacklistedUrlPhrases: string[] = [];
-    searchQuery: string = '';
 
+    /**
+     * @param name name of the bot
+     */
     constructor(name: string) {
         if (!name.length) {
             throw new Error(`${name} is invalid, try 'Bot 1'\n`);
         }
         // Bot names should be unique
-        if (ScraperBot.bot_names.indexOf(name) > -1) {
+        if (ScraperBot.botNames.indexOf(name) > -1) {
             throw new Error(`A bot with name "${name}" has already been created\n`);
         }
-        this.bot_name = name;
-        ScraperBot.bot_names.push(name);
+        this.botName = name;
+        ScraperBot.botNames.push(name);
 
         // Set up storage parameters to store data using current timestamp
         this.storage_label = `${name} ${new Date().toISOString().replace(new RegExp(':', 'g'), '-')}`;
-        this.storage_location = `${Configs.appConfigs.saveLocation}/${this.storage_label}`;
+        this.storageLocation = `${Configs.appConfigs.saveLocation}/${this.storage_label}`;
         // Create destination folder
-        FileSystem.mkdirSync(this.storage_location);
-
-        this.running = false;
-        this.streaming = false;
-        this.latest_tweet_id = '';
+        FileSystem.mkdirSync(this.storageLocation);
     }
 
     /**
      *  Begins the scrape and stream processes
      */
-    async start() {
+    async start(): Promise<void> {
         if (this.running) {
-            console.log(`${this.bot_name} is already running`);
+            console.log(`${this.botName} is already running`);
             return;
         }
         this.running = true;
-        console.log(`[v_v] ${this.bot_name}: initialising\n`);
+        console.log(`[v_v] ${this.botName}: initialising\n`);
+        this.urlComponents = {
+            f: 'tweets', // This makes it so that the latest content comes first
+            q: this.query,
+            src: 'typd',
+            include_entities: true,
+            include_available_features: true
+        };
         await this.scrape();
         await this.stream();
-    }
-
-    /**
-     * Finds all result on twitter with the query specified going back in time.
-     * @param max_position the max position of where the scrape shold start from.
-     * @param since_id the minimum Id of the Tweet the scrape can go back to.
-     */
-    private scrape(max_position?: string, since_id?: string): Promise<void> {
-        // construct scrape target url encoding all components
-        let components = {
-            'f': 'tweets', // this makes it so that the latest content comes first
-            'q': this.searchQuery,
-            'src': 'typd',
-            'include_entities': 1,
-            'include_available_features': 1
-        };
-        if (isNullOrUndefined(max_position)) {
-            components['min_position'] = ''; // only add this parameter if max position has not been defined
-        } else {
-            components['max_position'] = max_position; // only add this parameter if it has been set
-        }
-        let url = `${Configs.appConfigs.twitterSearchUrl}?${Querystring.stringify(components)}`;
-
-        return new Promise<void>((resolve, reject) => {
-            console.log(`[0_0] ${this.bot_name}: Scanning ${url}\n`);
-            // Retrieve scrape result and parse html to json
-            HttpRequest.get(url, async (error, response, body) => {
-                if (error) {
-                    Utils.handleError(error);
-                    reject(error);
-                }
-                if (body) {
-                    let result: TweetSearchResult = JSON.parse(body);
-                    if (result) {
-                        if (this.processResults(result, since_id)) {
-                            console.log(`[^_^] ${this.bot_name}: Results processed`);
-                            console.log(`[^_^] ${this.bot_name}: Has more items: ${result.has_more_items}\n`);
-                            // if there is still more results continue
-                            if (result.has_more_items) {
-                                await this.scrape(result.min_position, since_id);
-                            } else if (!isNullOrUndefined(result.max_position) && result.max_position !== this.stream_max_position) {
-                                console.log(`[^_^] ${this.bot_name}: Starting from the top\n`);
-                                await this.scrape(result.max_position, since_id);
-                            } else {
-                                console.log(`[^_^] ${this.bot_name}: Scrape complete\n`);
-                            }
-                        }
-                    } else {
-                        Utils.handleError('Could not parse data retrieved');
-                    }
-                } else {
-                    Utils.handleError('Could not receive any data from twitter');
-                }
-                resolve();
-            });
-        });
     }
 
     /**
      * Check Twitter for any updates. Sleeps when scan is completed.
      * This stream is async because we don't want the bot to spam Twitter.
      */
-    private async stream() {
+    private async stream(): Promise<void> {
         if (this.streaming) {
-            console.log(`${this.bot_name} is already streaming`);
+            console.log(`${this.botName} is already streaming`);
             return;
         }
-        console.log(`[D_D] ${this.bot_name}: Stream started\n`);
+        console.log(`[D_D] ${this.botName}: Stream started\n`);
         this.streaming = true;
         while (this.streaming) {
-            await this.scrape(null, this.latest_tweet_id);
-            console.log(`[^_^] ${this.bot_name}: Latest Id: ${this.latest_tweet_id}`);
-
+            await this.scrape(this.latest_max_position);
             // we may not want to crawl on Twitter too frequently
             await this.sleep(Configs.appConfigs.stream_interval_ms);
         }
+    }
+
+    /**
+     * Begins the traverse process configuring the traverse's min and max positions
+     * @param min_position the min position of where the scrape should stop.
+     */
+    private async scrape(min_position?: string): Promise<void> {
+        // Construct scrape target url encoding all components
+        let targetUrlComponents = Object.assign(new SearchComponents(), this.urlComponents);
+        // Set the min postion when streaming upwards
+        if (min_position) {
+            targetUrlComponents.min_position = min_position;
+        } else {
+            targetUrlComponents.max_position = this.latest_max_position;
+        }
+        let url = `${Configs.appConfigs.twitterSearchUrl}?${Querystring.stringify(targetUrlComponents)}`;
+        // Set the latest max position when the scrape started
+        await this.traverseTimeLine(url);
+    }
+
+    /**
+     * Finds all result on twitter with the query specified going down the timeline.
+     * @param url target url of the traverse page
+     */
+    private async traverseTimeLine(url: string, last_max_position?: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            console.log(`[0_0] ${this.botName}: Scanning ${url}\n`);
+            // Retrieve scrape result and parse html to json
+            HttpRequest.get(url, async (error, response, body) => {
+                if (error) {
+                    Utils.handleError(error, reject);
+                }
+                if (body) {
+                    let result: TweetSearchResult = JSON.parse(body);
+                    if (result) {
+                        // Process the results
+                        this.processResults(result)
+                        // Set the next target page and continue the traverse
+                        let newTargetUrlComponents = Object.assign(new SearchComponents(), this.urlComponents);
+
+                        if (result.min_position) { // If we are traversing downwards, use the min_position as max for the next traverse
+                            newTargetUrlComponents.max_position = result.min_position.replace('+', '%2B');
+                        }
+
+                        if (!this.latest_max_position) {
+                            // If the stream has hit it's end we have to set the latest max_position and use it 
+                            // as the min_position in the next query
+                            this.latest_max_position = newTargetUrlComponents.max_position ?
+                                newTargetUrlComponents.max_position :
+                                result.max_position.replace('+', '%2B');
+                        }
+
+                        if (last_max_position === newTargetUrlComponents.max_position) {
+                            // No difference in the last max positions and the current so stop the traverse
+                            console.log(`[^_^] ${this.botName}: Scrape complete\n`);
+                            resolve();
+                        } else {
+                            // Execute the next traverse going down the timeline
+                            await this.traverseTimeLine(`${Configs.appConfigs.twitterSearchUrl}?${Querystring.stringify(newTargetUrlComponents)}`, newTargetUrlComponents.max_position);
+                        }
+                    } else {
+                        Utils.handleError('Could not parse data retrieved', reject);
+                    }
+                } else {
+                    Utils.handleError('Could not receive any data from twitter', reject);
+                }
+                resolve();
+            });
+        });
     }
 
     /**
@@ -148,74 +166,60 @@ export class ScraperBot {
      * @param since_id the oldest Id we should process.
      * @returns {success} indicates whether scrape should continue. False if since_id is surpassed.
      */
-    private processResults(scrape_results: TweetSearchResult, since_id: string): boolean {
+    private processResults(scrape_results: TweetSearchResult): void {
          // save the results to the emulated document to parse as HTML
         document.body.innerHTML = scrape_results.items_html;
-        for (let tweetBlock of Utils.htmlCollectionToArray<HTMLLIElement>(document.body.children)) {
-            // Set the latest Id as the largest Id seen so that 
-            // We can keep track of the next group to query for using since_id
-            let id = tweetBlock.querySelector('[data-tweet-id]').getAttribute('data-tweet-id'),
-                bigId = BigInt(id); // Need to convert the Id to big int since normal number will overflow
-            if (bigId) {
-                // End the scrape if since_id has been surpassed
-                if (since_id && bigId <= BigInt(since_id)) {
-                    return false;
-                }
-                // Set the latest tweet id so that the stream knows not to look for anything older
-                if (!this.latest_tweet_id || bigId > BigInt(this.latest_tweet_id)) {
-                    this.latest_tweet_id = id;
-                }
-            } else {
-                return false;
+        let tweets = Utils.htmlCollectionToArray<HTMLLIElement>(document.body.children);
+        for (let tweetBlock of tweets) {
+            let id = tweetBlock.querySelector('[data-tweet-id]').getAttribute('data-tweet-id');
+            if (FileSystem.existsSync(`${this.storageLocation}/${id}`)) {
+                // The Tweet has already been saved so we do not need to save anything, Twitter does not allow users to edit their Tweet
+                continue;
             }
             // Filter out blacklisted url phrases from the expanded urls
-            let validResult = true;
+            let validTweet = true;
             for (let phrase of this.blacklistedUrlPhrases) {
                 if (tweetBlock.querySelector(`[data-expanded-url*="${phrase}"]`)) {
-                    console.warn(`[X_X] ${this.bot_name}: Item blacklisted Id: ${id}\n L->  Illegal phrase matched: "${phrase}"\n`);
-                    validResult = false;
+                    console.warn(`[X_X] ${this.botName}: Item blacklisted Id: ${id}\n L->  Illegal phrase matched: "${phrase}"\n`);
+                    validTweet = false;
                     break;
                 }
             }
             // Save valid tweet block to file
-            if (validResult) {
+            if (validTweet) {
                 this.saveResult(`${id}`, tweetBlock);
-                console.log(`[^_^] ${this.bot_name}: Saved item: ${id}\n`);
             }
         }
-        return true;
+        console.log(`[^_^] ${this.botName}: Results processed`);
     }
 
     /**
      * Parse and saves the result to the destination folder.
      * @param name name of result to be used
-     * @param result
+     * @param {saved} whether or not the result was saved
      */
-    private saveResult(name: string, result: HTMLLIElement): void {
-        // Create destination folder for result
-        FileSystem.mkdir(`${this.storage_location}/${name}`, (error) => {
-            if (error) {
-                Utils.handleError(error);
-            } else {
-                // Save original result
-                FileSystem.writeFileSync(
-                    `${this.storage_location}/${name}/${name}.html`,
-                    result.outerHTML
-                );
-                // More data analysis friendly json result
-                let tweet = TwitterUtils.parseResult(result);
-                FileSystem.writeFileSync(
-                    `${this.storage_location}/${name}/${name}.json`,
-                    JSON.stringify(tweet, null, 4) // Pretty print json
-                );
-                this.getTweetImages(name, tweet);
-                console.log(`[o_O] ${this.bot_name}: Collecting images for item: ${name}\n`);
-            }
-        });
+    private saveResult(name: string, result: HTMLLIElement): boolean {
+        FileSystem.mkdirSync(`${this.storageLocation}/${name}`);
+        // Save original result
+        FileSystem.writeFileSync(
+            `${this.storageLocation}/${name}/${name}.html`,
+            result.outerHTML
+        );
+        // More data analysis friendly json result
+        let tweet = TwitterUtils.parseResult(result);
+        FileSystem.writeFileSync(
+            `${this.storageLocation}/${name}/${name}.json`,
+            JSON.stringify(tweet, null, 4) // Pretty print json
+        );
+        // Collect images from this Tweet
+        this.getTweetImages(name, tweet);
+        console.log(`[^_^] ${this.botName}: Saved item: ${name}\n`);
+        return true;
     }
 
     /**
      * Downloads the tweet's media images and saves it.
+     * @param name name of result to be used to save the images
      * @param tweet tweet containing image urls
      */
     private getTweetImages(name: string, tweet: Tweet): void {
@@ -229,17 +233,19 @@ export class ScraperBot {
 
     /**
      * Retrieves image from URL
-     * @param name name of result to be used
+     * @param name name of result to be used to save the image
      * @param imageUrl url of image to be downloaded
      */
     private downloadImage(name: string, imageUrl: string): void {
+        console.log(`[o_O] ${this.botName}: Collecting images for item: ${name}\n`);
         HttpRequest.get({ url: imageUrl, encoding: 'binary' }, (error, response, body) => {
             if (error) {
                 Utils.handleError(error);
             }
             if (body) {
+                // save the image as a binary file
                 FileSystem.writeFileSync(
-                    `${this.storage_location}/${name}/${Utils.getFileName(imageUrl)}`,
+                    `${this.storageLocation}/${name}/${Utils.getFileName(imageUrl)}`,
                     body,
                     'binary'
                 );
@@ -254,8 +260,8 @@ export class ScraperBot {
      * @param ms amount of time to sleep in milliseconds
      * @returns {promise} promise which will end when the bot can start again
      */
-    private sleep(ms: number): Promise<void> {
-        console.log(`[v_v] ${this.bot_name}: Sleeping for ${ms} ms\n`);
+    private async sleep(ms: number): Promise<void> {
+        console.log(`[v_v] ${this.botName}: Sleeping for ${ms} ms\n`);
         return new Promise<void>(resolve => setTimeout(resolve, ms));
     }
 }

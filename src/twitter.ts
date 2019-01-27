@@ -27,6 +27,16 @@ export class SearchQueryParams {
     operators?: QueryOperatorPair[];
 } 
 
+export class SearchComponents {
+    f?: string;
+    q: string;
+    src?: string;
+    include_entities?: boolean;
+    include_available_features?: boolean;
+    min_position?: string;
+    max_position?: string;
+}
+
 export class TweetSearchResult {
     max_position: string;
     min_position: string;
@@ -79,6 +89,11 @@ export class TwitterUtils {
         return result.trim();
     }
 
+    /**
+     * Collects all users this Tweet is replying to
+     * @param tweetBlock HTML form of the tweet
+     * @returns An array of users this Tweet is replying to
+     */
     static getReplyingTo(tweetBlock: HTMLElement): TwitterUser[] {
         let result: TwitterUser[] = [];
         for (let container of Utils.nodeListOfToArray(tweetBlock.querySelectorAll('.ReplyingToContextBelowAuthor .js-user-profile-link'))) {
@@ -90,6 +105,10 @@ export class TwitterUtils {
         return result;
     }
 
+    /**
+     * Finds all images on the Tweet.
+     * @param tweetBlock HTML form of the tweet
+     */
     static getImages(tweetBlock: HTMLElement): string[] {
         let result: string[] = [];
         // collect images from both photo containers and text block
@@ -103,6 +122,10 @@ export class TwitterUtils {
         return result;
     }
 
+    /**
+     * Finds all videos and returns an array of their URL.
+     * @param tweetBlock HTML form of the tweet
+     */
     static getVideos(tweetBlock: HTMLElement): string[] {
         let result: string[] = [];
         for (let container of Utils.nodeListOfToArray(tweetBlock.querySelectorAll('video'))) {
@@ -115,6 +138,10 @@ export class TwitterUtils {
         return result;
     }
 
+    /**
+     * Finds all card media on the Tweet and returns an array of Media objects.
+     * @param tweetBlock HTML form of the tweet
+     */
     static getOtherMedia(tweetBlock: HTMLElement): Media[] {
         let result: Media[] = [];
         for (let container of Utils.nodeListOfToArray(tweetBlock.querySelectorAll('[data-card-name]'))) {

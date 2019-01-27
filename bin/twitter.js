@@ -7,6 +7,12 @@ var SearchQueryParams = /** @class */ (function () {
     return SearchQueryParams;
 }());
 exports.SearchQueryParams = SearchQueryParams;
+var SearchComponents = /** @class */ (function () {
+    function SearchComponents() {
+    }
+    return SearchComponents;
+}());
+exports.SearchComponents = SearchComponents;
 var TweetSearchResult = /** @class */ (function () {
     function TweetSearchResult() {
     }
@@ -47,6 +53,11 @@ var TwitterUtils = /** @class */ (function () {
         }
         return result.trim();
     };
+    /**
+     * Collects all users this Tweet is replying to
+     * @param tweetBlock HTML form of the tweet
+     * @returns An array of users this Tweet is replying to
+     */
     TwitterUtils.getReplyingTo = function (tweetBlock) {
         var result = [];
         for (var _i = 0, _a = utils_1.Utils.nodeListOfToArray(tweetBlock.querySelectorAll('.ReplyingToContextBelowAuthor .js-user-profile-link')); _i < _a.length; _i++) {
@@ -58,6 +69,10 @@ var TwitterUtils = /** @class */ (function () {
         }
         return result;
     };
+    /**
+     * Finds all images on the Tweet.
+     * @param tweetBlock HTML form of the tweet
+     */
     TwitterUtils.getImages = function (tweetBlock) {
         var result = [];
         // collect images from both photo containers and text block
@@ -71,6 +86,10 @@ var TwitterUtils = /** @class */ (function () {
         }
         return result;
     };
+    /**
+     * Finds all videos and returns an array of their URL.
+     * @param tweetBlock HTML form of the tweet
+     */
     TwitterUtils.getVideos = function (tweetBlock) {
         var result = [];
         for (var _i = 0, _a = utils_1.Utils.nodeListOfToArray(tweetBlock.querySelectorAll('video')); _i < _a.length; _i++) {
@@ -83,6 +102,10 @@ var TwitterUtils = /** @class */ (function () {
         }
         return result;
     };
+    /**
+     * Finds all card media on the Tweet and returns an array of Media objects.
+     * @param tweetBlock HTML form of the tweet
+     */
     TwitterUtils.getOtherMedia = function (tweetBlock) {
         var result = [];
         var _loop_1 = function (container) {
