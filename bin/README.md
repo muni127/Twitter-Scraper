@@ -1,5 +1,5 @@
 # Executables
-If you already have Node.js installed
+If you already have Node.js installed only download the .js files then run
 ```shell
 node server
 ```
