@@ -126,3 +126,14 @@ export const appConfigs = {
     stream_interval_ms: 10000 // stream every 10 seconds
 };
 ```
+# Compiling to EXE for any environment
+Recommended to install [pkg](https://github.com/zeit/pkg)
+```shell
+npm install -g pkg
+tsc
+```
+Go to the bin folder after the .js files have been complied in the ./bin folder
+```shell
+pkg server.js
+```
+This will generate three executables. Linux, Macos and Windows
